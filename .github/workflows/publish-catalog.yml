@@ -1,0 +1,48 @@
+name: Publish to Catalog
+
+# Delegates to the centrally maintained reusable catalog-publish workflow in
+# OrgSDK/plugins. That workflow builds + validates via THIS repo's npm scripts,
+# then publishes with the orgsdk-plugin CLI (dry-run by default; a real publish
+# requires the opt-in variable AND the token secret).
+#
+# google-sheets opts in via ORGSDK_ENABLE_CATALOG_PUBLISH=true, so pushes to main
+# that touch plugin/** or package.json publish a real, validated artifact. See
+# https://github.com/OrgSDK/plugins/blob/main/docs/reusable-workflows.md
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugin/**"
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run only (do not POST to catalog)"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    # Auto path: only when the opt-in variable is 'true'. Manual dispatch is
+    # always allowed (a manual real publish is re-gated inside the reusable
+    # workflow). pull_request is excluded — there is no pull_request trigger.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && vars.ORGSDK_ENABLE_CATALOG_PUBLISH == 'true')
+    uses: OrgSDK/plugins/.github/workflows/plugin-publish.yml@4eb6706b38a8b1ccbad8b68bfbe9924e3167ef1f
+    with:
+      # push → real publish; manual → honor the dry_run choice.
+      dry-run: ${{ !(github.event_name == 'push' || github.event.inputs.dry_run == 'false') }}
+      publish-enabled: ${{ vars.ORGSDK_ENABLE_CATALOG_PUBLISH }}
+      catalog-url: ${{ vars.ORGSDK_CATALOG_URL }}
+      artifact-name: plugin-google-sheets-${{ github.sha }}
+    secrets:
+      ORGSDK_PUBLISH_TOKEN: ${{ secrets.ORGSDK_PUBLISH_TOKEN }}

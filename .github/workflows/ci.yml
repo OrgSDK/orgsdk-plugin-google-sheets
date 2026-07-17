@@ -1,0 +1,23 @@
+name: CI
+
+# Delegates to the centrally maintained reusable CI workflow in OrgSDK/plugins.
+# That workflow runs in THIS repo's context (caller checkout, caller
+# GITHUB_TOKEN) and only invokes the npm scripts below + the orgsdk-plugin CLI.
+# See https://github.com/OrgSDK/plugins/blob/main/docs/reusable-workflows.md
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: OrgSDK/plugins/.github/workflows/plugin-ci.yml@4eb6706b38a8b1ccbad8b68bfbe9924e3167ef1f
+    with:
+      artifact-name: plugin-google-sheets-${{ github.sha }}

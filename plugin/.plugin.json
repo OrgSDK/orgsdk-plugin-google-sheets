@@ -1,0 +1,44 @@
+{
+	"$schema": "https://orgsdk.ai/schemas/plugin-manifest.v1.json",
+	"name": "google-sheets",
+	"version": "1.0.2",
+	"description": "Google Sheets and Google Tasks share one Google connection. Connect once in Google Sheets to use both, with the option to bring your own OAuth client if needed.",
+	"entry": "index.ts",
+	"auth": {
+		"type": "oauth2",
+		"provider": "google-oauth",
+		"label": "Google (Connect Google)",
+		"hint": "Connect once in Google Sheets to use Google Sheets and Google Tasks. Bring your own Google OAuth client if needed.",
+		"scopes": [
+			"https://www.googleapis.com/auth/spreadsheets",
+			"https://www.googleapis.com/auth/tasks"
+		],
+		"callbackPath": "/callback",
+		"firstParty": true
+	},
+	"marketplace": {
+		"group": "google",
+		"displayName": "Google Sheets",
+		"tagline": "Read and write Google Sheets from agent workflows.",
+		"category": "Data & AI",
+		"tags": ["spreadsheets", "google", "data"],
+		"useCases": [
+			"Sync CRM or form data into a structured sheet table",
+			"Generate weekly reports by appending agent run results",
+			"Update specific rows in a table from workflow output",
+			"Read a sheet as a config or lookup source for an agent"
+		],
+		"permissionsSummary": "Access Google Sheets and Tasks data via OAuth.",
+		"seoOverview": {
+			"heading": "Integrate AI agents with Google Sheets",
+			"paragraph": "Connect Google Sheets to an OrgSDK agent team and give workflows direct read and write access to your spreadsheets. Agents can read a range as a lookup or config source, append rows from workflow output, and update individual columns inside a structured table — running on a schedule or on demand, with an approval gate before any write. The plugin supports both A1 ranges and Google's structured table format, so existing sheets work without migration."
+		},
+		"screenshots": [],
+		"links": {
+			"homepage": "https://workspace.google.com/products/sheets/",
+			"docs": "https://developers.google.com/sheets/api/guides/concepts",
+			"sourceRepo": "https://github.com/OrgSDK/orgsdk-plugin-google-sheets"
+		},
+		"minRuntimeVersion": "0.0.0"
+	}
+}
