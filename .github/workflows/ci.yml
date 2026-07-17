@@ -18,6 +18,6 @@ concurrency:
 
 jobs:
   ci:
-    uses: OrgSDK/plugins/.github/workflows/plugin-ci.yml@4eb6706b38a8b1ccbad8b68bfbe9924e3167ef1f
+    uses: OrgSDK/plugins/.github/workflows/plugin-ci.yml@c5296ffdc31e567a0ae3dd32a25594702995d839
     with:
       artifact-name: plugin-google-sheets-${{ github.sha }}
