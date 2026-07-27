@@ -1,7 +1,7 @@
 {
 	"$schema": "https://orgsdk.ai/schemas/plugin-manifest.v1.json",
 	"name": "google-sheets",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Google Sheets and Google Tasks share one Google connection. Connect once in Google Sheets to use both, with the option to bring your own OAuth client if needed.",
 	"entry": "index.ts",
 	"auth": {
@@ -14,7 +14,71 @@
 			"https://www.googleapis.com/auth/tasks"
 		],
 		"callbackPath": "/callback",
-		"firstParty": true
+		"firstParty": true,
+		"setupGuide": {
+			"summary": "One-click Google connection is the default. If it is unavailable, or you prefer to use your own Google OAuth app, create a Google Cloud OAuth client and paste its downloaded JSON here. The resulting connection is shared with Google Tasks, so you only connect once.",
+			"prerequisites": [
+				"Access to create or edit a Google Cloud project.",
+				"Permission to configure the project's OAuth consent screen and credentials.",
+				"A Google account that can authorize the requested workspace data."
+			],
+			"steps": [
+				{
+					"title": "Open or create a Google Cloud project",
+					"description": "Use an existing project or create a new one to hold the OAuth client. This single connection covers both Sheets and Tasks.",
+					"link": {
+						"label": "Google Cloud Console",
+						"url": "https://console.cloud.google.com/"
+					}
+				},
+				{
+					"title": "Enable the required APIs",
+					"description": "The shared connection needs both the Google Sheets API and the Google Tasks API, because Google Tasks reuses this connection.",
+					"link": {
+						"label": "Enable the Google Sheets API",
+						"url": "https://console.cloud.google.com/apis/library/sheets.googleapis.com"
+					}
+				},
+				{
+					"title": "Configure the OAuth consent screen",
+					"description": "Set the consent screen to External (or Internal for Workspace). Add your own Google account as a test user while the app remains in testing."
+				},
+				{
+					"title": "Create a Web application OAuth client",
+					"description": "Create credentials of type OAuth client ID. The application type must be Web application — not Desktop app or another type."
+				},
+				{
+					"title": "Add the authorized redirect URI",
+					"description": "Copy the OrgSDK callback URL below and paste it under Authorized redirect URIs (not under Authorized JavaScript origins)."
+				},
+				{
+					"title": "Download the OAuth client JSON",
+					"description": "Download the client configuration and paste the complete file contents into the field below."
+				},
+				{
+					"title": "Connect Google",
+					"description": "Saving valid JSON enables the authorization action. Complete Google's consent screen — Google Tasks is covered by this same connection."
+				}
+			],
+			"callback": {
+				"label": "Authorized redirect URI",
+				"instruction": "Paste this exact URL into the OAuth client's Authorized redirect URIs list."
+			},
+			"configField": {
+				"label": "Google OAuth client JSON",
+				"description": "Paste the complete contents of the JSON file downloaded for the Web application OAuth client. It contains a client ID and client secret.",
+				"placeholder": "{ \"web\": { ... } }"
+			},
+			"permissions": {
+				"https://www.googleapis.com/auth/spreadsheets": {
+					"label": "View and manage your Google Spreadsheets"
+				},
+				"https://www.googleapis.com/auth/tasks": {
+					"label": "View and manage your Google Tasks"
+				}
+			},
+			"troubleshootingUrl": "https://support.google.com/cloud/answer/6158849"
+		}
 	},
 	"marketplace": {
 		"group": "google",

@@ -1,6 +1,6 @@
 {
 	"name": "@orgsdk/plugin-google-sheets",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Google Sheets read/write + owns the shared google-oauth connect flow for google-sheets and google-tasks (first-party one-click or BYO)",
 	"type": "module",
 	"private": true,
@@ -22,7 +22,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.12",
-		"@orgsdk/plugins": "0.2.1",
+		"@orgsdk/plugins": "0.2.2",
 		"@types/bun": "^1.3.9",
 		"typescript": "~6.0.3"
 	},

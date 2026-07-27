@@ -90,7 +90,7 @@ status-check bypass races (defense in depth).
 
 ## Version policy
 
-- **Current version:** `1.0.2`.
+- **Current version:** `1.0.3`.
 - The manifest version (`plugin/.plugin.json` → `version`) is the **source of
   truth** for the catalog. `package.json` → `version` is kept in sync (enforced
   by the CI version guard).
@@ -101,6 +101,18 @@ status-check bypass races (defense in depth).
 - Versions are **write-once** in the catalog: re-publishing the same
   `(slug, version)` with identical content is idempotent; different content is
   rejected with HTTP 409. Always bump the version for changed content.
+
+### 1.0.3 — Google BYO OAuth setup guide
+
+Adds a complete structured `auth.setupGuide` to the manifest so the dashboard
+renders an in-product Google Cloud checklist for bring-your-own OAuth (fallback
+when one-click connection is unavailable or deliberately not used). No plugin
+source behavior, safe functions, auth provider, callback, scopes, first-party
+flag, or runtime dependencies changed.
+
+The `@orgsdk/plugins` devDependency moves to `0.2.2`, which models
+`auth.setupGuide` in the canonical Zod schema. The lockfile is regenerated
+automatically on the first `bun install` after SDK 0.2.2 is published to npm.
 
 ### 1.0.2 — standalone repository extraction
 

@@ -6,6 +6,36 @@ The catalog treats versions as **write-once**: a given `(slug, version)` may be
 re-published only with identical artifact content; differing content is
 rejected with HTTP 409. Every entry below is therefore forward-only.
 
+## [1.0.3] — Google BYO OAuth setup guide
+
+### Added
+- **`auth.setupGuide`** — a complete structured setup guide that the dashboard
+  renders as an in-product checklist for bringing your own Google OAuth client.
+  One-click connection remains the default; the guide appears only after the
+  user deliberately chooses "Use your own OAuth app" or when one-click is
+  unavailable. The resulting connection is shared with Google Tasks.
+  - Seven ordered steps: Google Cloud project → enable Sheets + Tasks APIs →
+    consent screen → Web application OAuth client → authorized redirect URI →
+    download JSON → connect.
+  - Callback URL presentation, credential field presentation, prerequisites,
+  and an HTTPS troubleshooting URL.
+  - Permission labels for both shared scopes (`spreadsheets`, `tasks`).
+  - Every external link is HTTPS-validated by the canonical author schema.
+
+### Changed
+- Bump `plugin/.plugin.json` version `1.0.2` → `1.0.3`.
+- Bump `package.json` version `1.0.2` → `1.0.3`.
+- Bump `@orgsdk/plugins` devDependency `0.2.1` → `0.2.2` (models
+  `auth.setupGuide`). **The lockfile must be regenerated after SDK 0.2.2 is
+  published to npm.**
+- `tests/manifest.test.ts` version assertion → `1.0.3` and new setup-guide
+  assertions.
+
+### Frozen (unchanged from 1.0.2)
+- All seven safe functions, the first-party authProvider, GET /callback, the
+  union Sheets+Tasks scopes, the first-party/BYO discriminator, and runtime
+  dependencies.
+
 ## [1.0.2] — standalone repository extraction
 
 A forward-only patch release that migrates the `google-sheets` plugin from the

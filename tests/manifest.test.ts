@@ -15,9 +15,9 @@ describe("manifest", () => {
 		expect(m.name).toBe("google-sheets");
 	});
 
-	it("has the bumped version 1.0.2", async () => {
+	it("has the bumped version 1.0.3", async () => {
 		const m = await readManifest();
-		expect(m.version).toBe("1.0.2");
+		expect(m.version).toBe("1.0.3");
 	});
 
 	it("declares the canonical $schema", async () => {
@@ -77,6 +77,56 @@ describe("manifest", () => {
 		const m = await readManifest();
 		const auth = m.auth as Record<string, unknown>;
 		expect(auth.firstParty).toBe(true);
+	});
+
+	// Google Sheets' connection experience is author-owned metadata. The setup
+	// guide appears only after the user deliberately chooses "Use your own
+	// OAuth app" or when one-click connection is unavailable.
+	it("declares a structured BYO setup guide (shared Sheets + Tasks connection)", async () => {
+		const m = await readManifest();
+		const auth = m.auth as Record<string, unknown>;
+		const rawGuide = auth.setupGuide;
+		expect(rawGuide).toBeDefined();
+		const guide = rawGuide as Record<string, unknown>;
+		expect(typeof guide.summary).toBe("string");
+		expect(guide.configField).toBeDefined();
+		const steps = guide.steps as Array<Record<string, unknown>>;
+		expect(Array.isArray(steps)).toBe(true);
+		expect(steps.length).toBeGreaterThanOrEqual(5);
+		for (const step of steps) {
+			const link = step.link as Record<string, string> | undefined;
+			if (link) expect(link.url).toMatch(/^https:\/\//i);
+		}
+		expect(String(guide.troubleshootingUrl)).toMatch(/^https:\/\//i);
+	});
+
+	// The guide must name BOTH the Sheets and Tasks APIs because the shared
+	// connection covers both plugins.
+	it("the setup guide names both Sheets and Tasks APIs in the enable-APIs step", async () => {
+		const m = await readManifest();
+		const auth = m.auth as Record<string, unknown>;
+		const guide = auth.setupGuide as Record<string, unknown> | undefined;
+		const steps = guide?.steps as Array<Record<string, unknown>> | undefined;
+		const enableStep = steps?.find((s) => /enable.*api/i.test(String(s.title)));
+		const desc = enableStep?.description?.toString().toLowerCase() ?? "";
+		expect(desc).toContain("sheets api");
+		expect(desc).toContain("tasks api");
+	});
+
+	it("declares permission labels for both shared scopes", async () => {
+		const m = await readManifest();
+		const auth = m.auth as Record<string, unknown>;
+		const guide = auth.setupGuide as Record<string, unknown> | undefined;
+		const permissions = guide?.permissions as
+			| Record<string, Record<string, string>>
+			| undefined;
+		expect(
+			permissions?.["https://www.googleapis.com/auth/spreadsheets"]?.label
+				?.length,
+		).toBeGreaterThan(0);
+		expect(
+			permissions?.["https://www.googleapis.com/auth/tasks"]?.label?.length,
+		).toBeGreaterThan(0);
 	});
 
 	it("declares marketplace metadata with the source-repo provenance link", async () => {
