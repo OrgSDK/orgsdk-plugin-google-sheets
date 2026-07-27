@@ -28,6 +28,51 @@ const UNION_SCOPES = [
 	"https://www.googleapis.com/auth/tasks",
 ];
 
+// Isolation: first-party-client.ts keeps a module-level config cache (60s TTL,
+// keyed by plugin name) that is shared across every test file in one `bun test`
+// run. `getFirstPartyConfig` returns that cached value WITHOUT calling `fetch`,
+// so a value leaked from connect-resolution.test.ts (clientId "fp-relay-id")
+// can bypass this file's routingFetch mock (clientId "fp-id") and land in the
+// stored bundle — an order/timing-dependent flake. mock.module is file-scoped:
+// only this file sees the cache-free doubles below; other files keep using the
+// real cached module. The doubles mirror the real relay URL + response shape so
+// this file's routingFetch answers exactly as it does for the real module.
+mock.module("../plugin/first-party-client", () => ({
+	getFirstPartyConfig: async (plugin: string) => {
+		const base = (process.env.PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
+		const res = await fetch(`${base}/api/oauth/config?plugin=${plugin}`);
+		if (!res.ok) {
+			throw new Error(`Relay /api/oauth/config returned ${res.status}`);
+		}
+		return (await res.json()) as {
+			available: boolean;
+			clientId?: string;
+			redirectUri?: string;
+		};
+	},
+	exchangeFirstPartyCode: async (
+		plugin: string,
+		code: string,
+		redirectUri: string,
+	) => {
+		const base = (process.env.PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
+		const res = await fetch(`${base}/api/oauth/exchange`, {
+			method: "POST",
+			body: JSON.stringify({ plugin, code, redirectUri }),
+		});
+		const data = (await res.json().catch(() => null)) as {
+			tokens?: { refresh_token?: string };
+			error?: string;
+		} | null;
+		if (!res.ok || !data?.tokens) {
+			throw new Error(
+				data?.error ?? `Relay /api/oauth/exchange returned ${res.status}`,
+			);
+		}
+		return data.tokens;
+	},
+}));
+
 interface StoredCredential {
 	provider: string;
 	name: string;
