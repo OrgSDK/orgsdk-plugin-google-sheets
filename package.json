@@ -16,7 +16,7 @@
 		"build": "bun run typecheck && bun run validate && bun run package"
 	},
 	"dependencies": {
-		"@googleapis/sheets": "^13.0.2",
+		"@googleapis/sheets": "^18.0.0",
 		"google-auth-library": "^10.6.2",
 		"zod": "^4.0.0"
 	},
