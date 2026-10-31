@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 (unreleased)
+
+- Pin the authoring/execution packages to 0.2.2/0.1.0, with the tracked executor packaging fixes.
+- Build a restricted npm distribution and verify every exported function from the packed artifact through the headless executor.
+- Add versioned npm release CI that publishes the exact tested tarball after explicit repository activation.
+
 All notable releases of `@orgsdk/plugin-google-sheets` are documented here.
 
 The catalog treats versions as **write-once**: a given `(slug, version)` may be

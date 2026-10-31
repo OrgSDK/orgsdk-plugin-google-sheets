@@ -15,9 +15,9 @@ describe("manifest", () => {
 		expect(m.name).toBe("google-sheets");
 	});
 
-	it("has the bumped version 1.0.3", async () => {
+	it("has the bumped version 1.0.4", async () => {
 		const m = await readManifest();
-		expect(m.version).toBe("1.0.3");
+		expect(m.version).toBe("1.0.4");
 	});
 
 	it("declares the canonical $schema", async () => {
@@ -73,10 +73,10 @@ describe("manifest", () => {
 	// firstParty: true declares the plugin CAN connect via OrgSDK's relay-held
 	// client (one-click). Whether it's AVAILABLE per-tenant is a runtime relay
 	// property (isFirstPartyAvailable). The manifest flag is the static opt-in.
-	it("declares firstParty: true (one-click connect capable)", async () => {
+	it("uses native BYO OAuth without the retired relay", async () => {
 		const m = await readManifest();
 		const auth = m.auth as Record<string, unknown>;
-		expect(auth.firstParty).toBe(true);
+		expect(auth.firstParty).toBeUndefined();
 	});
 
 	// Google Sheets' connection experience is author-owned metadata. The setup

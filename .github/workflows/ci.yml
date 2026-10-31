@@ -1,10 +1,5 @@
 name: CI
 
-# Delegates to the centrally maintained reusable CI workflow in OrgSDK/plugins.
-# That workflow runs in THIS repo's context (caller checkout, caller
-# GITHUB_TOKEN) and only invokes the npm scripts below + the orgsdk-plugin CLI.
-# See https://github.com/OrgSDK/plugins/blob/main/docs/reusable-workflows.md
-
 on:
   push:
     branches: [main]
@@ -12,12 +7,58 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ci:
-    uses: OrgSDK/plugins/.github/workflows/plugin-ci.yml@4eb6706b38a8b1ccbad8b68bfbe9924e3167ef1f
-    with:
-      artifact-name: plugin-google-sheets-${{ github.sha }}
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.22.1", "24"]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: "1.4.0"
+      - run: bun install --frozen-lockfile
+      - name: Install matched headless Chromium for browser plugins
+        run: |
+          if node -e 'const p=require("./package.json"); process.exit(p.name.includes("plugin-browser") ? 0 : 1)'; then
+            bunx --no-install playwright install --with-deps chromium
+          fi
+      - name: Version guard
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: bun run version-guard
+      - name: Author checks
+        run: |
+          bun run check
+          bun run typecheck
+          bun audit
+          bun run test
+          bun run validate
+          bun run package
+      - name: Build npm payload and execute every function
+        env:
+          NPM_TEST_ARTIFACT_DIR: artifacts
+        run: |
+          bun run build:npm
+          bun run test:executor
+          bun run test:registration
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: npm-node-${{ matrix.node }}-${{ github.sha }}
+          path: artifacts/*.tgz
+          if-no-files-found: error

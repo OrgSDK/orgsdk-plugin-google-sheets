@@ -1,61 +1,34 @@
 import { OAuth2Client } from "google-auth-library";
-import { getFirstPartyAccessToken } from "./first-party-client";
 
-// NOTE: oauth.ts + first-party-client.ts are shared leaf modules duplicated
-// across the google-sheets and google-tasks plugins (cloud-mode plugins must
-// be self-contained — cross-plugin sibling imports are blocked by the
-// materialiser's path-traversal guard). Keep the two copies in sync.
-const PLUGIN_NAME = "google-sheets";
-
+/** OrgSDK's host refreshes tokens before issuing a run-scoped snapshot. */
 export interface GoogleOAuthBundle {
-	secret_clientId?: string;
-	secret_clientSecret?: string;
-	secret_refreshToken?: string;
-	/** Discriminator set at connect time. Absent = legacy (treated as byo). */
 	source?: "first-party" | "byo";
+	secret_accessToken?: string;
 	[key: string]: unknown;
 }
-
-/**
- * Build an OAuth2Client from a stored credential bundle.
- *
- * BYO bundles refresh locally using the bundled client secret. First-party
- * bundles (`source: "first-party"`) carry no secret — a fresh access token is
- * fetched from the relay (cached per refresh token, see first-party-client).
- * Async because first-party may need a network round-trip.
- */
 export async function getGoogleOAuth2Client(
 	bundle: GoogleOAuthBundle,
 ): Promise<OAuth2Client> {
-	const { secret_clientId, secret_clientSecret, secret_refreshToken } = bundle;
-
-	if (bundle.source === "first-party") {
-		if (!secret_refreshToken) {
-			throw new Error(
-				"Missing google-oauth refresh token for first-party credential.",
-			);
-		}
-		const accessToken = await getFirstPartyAccessToken(
-			PLUGIN_NAME,
-			secret_refreshToken,
-		);
-		// No client secret and no refresh_token on the client — the relay owns
-		// refresh. Access token is fresh (see cache in first-party-client).
-		const client = new OAuth2Client({ clientId: secret_clientId });
-		client.setCredentials({ access_token: accessToken });
-		return client;
-	}
-
-	if (!secret_refreshToken) {
+	if (bundle.source !== "byo")
 		throw new Error(
-			"Missing google-oauth refresh token. Connect Google in the dashboard (Credentials tab).",
+			"Connect Google using your own OAuth application in OrgSDK.",
+		);
+	if (
+		typeof bundle.secret_accessToken !== "string" ||
+		!bundle.secret_accessToken.trim()
+	) {
+		throw new Error(
+			"Missing google-oauth access token. Reconnect Google in OrgSDK.",
 		);
 	}
 	const client = new OAuth2Client({
-		clientId: secret_clientId,
-		clientSecret: secret_clientSecret,
+		transporterOptions: {
+			timeout: 15_000,
+			retry: false,
+			maxContentLength: 2_000_000,
+		},
 	});
-	client.setCredentials({ refresh_token: secret_refreshToken });
+	client.setCredentials({ access_token: bundle.secret_accessToken });
 	return client;
 }
 
