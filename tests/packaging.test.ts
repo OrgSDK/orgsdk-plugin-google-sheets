@@ -82,9 +82,9 @@ describe("packaging", () => {
 		// All three runtime dependencies ARE present.
 		const deps = pkg.dependencies as Record<string, string> | undefined;
 		expect(deps).toBeDefined();
-		expect(deps?.["@googleapis/sheets"]).toBe("^13.0.2");
-		expect(deps?.["google-auth-library"]).toBe("^10.6.2");
-		expect(deps?.zod).toBe("^4.0.0");
+		expect(deps?.["@googleapis/sheets"]).toBe("18.1.2");
+		expect(deps?.["google-auth-library"]).toBe("11.3.2");
+		expect(deps?.zod).toBe("4.6.7");
 		// The authoring SDK must NOT be a runtime dependency (type-only).
 		expect(deps?.["@orgsdk/plugins"]).toBeUndefined();
 		expect(Object.keys(deps ?? {}).sort()).toEqual([

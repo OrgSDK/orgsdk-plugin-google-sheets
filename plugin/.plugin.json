@@ -1,22 +1,21 @@
 {
 	"$schema": "https://orgsdk.ai/schemas/plugin-manifest.v1.json",
 	"name": "google-sheets",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Google Sheets and Google Tasks share one Google connection. Connect once in Google Sheets to use both, with the option to bring your own OAuth client if needed.",
 	"entry": "index.ts",
 	"auth": {
 		"type": "oauth2",
 		"provider": "google-oauth",
 		"label": "Google (Connect Google)",
-		"hint": "Connect once in Google Sheets to use Google Sheets and Google Tasks. Bring your own Google OAuth client if needed.",
+		"hint": "Connect your own Google OAuth application in OrgSDK. The host refreshes tokens; plugins receive only a run-scoped access token.",
 		"scopes": [
 			"https://www.googleapis.com/auth/spreadsheets",
 			"https://www.googleapis.com/auth/tasks"
 		],
 		"callbackPath": "/callback",
-		"firstParty": true,
 		"setupGuide": {
-			"summary": "One-click Google connection is the default. If it is unavailable, or you prefer to use your own Google OAuth app, create a Google Cloud OAuth client and paste its downloaded JSON here. The resulting connection is shared with Google Tasks, so you only connect once.",
+			"summary": "Connect your own Google OAuth application in OrgSDK. The host manages consent and token refresh. Plugins receive only a fresh access token; the former first-party relay is unsupported.",
 			"prerequisites": [
 				"Access to create or edit a Google Cloud project.",
 				"Permission to configure the project's OAuth consent screen and credentials.",
@@ -45,19 +44,19 @@
 				},
 				{
 					"title": "Create a Web application OAuth client",
-					"description": "Create credentials of type OAuth client ID. The application type must be Web application — not Desktop app or another type."
+					"description": "Create credentials of type OAuth client ID. The application type must be Web application \u2014 not Desktop app or another type."
 				},
 				{
 					"title": "Add the authorized redirect URI",
-					"description": "Copy the OrgSDK callback URL below and paste it under Authorized redirect URIs (not under Authorized JavaScript origins)."
+					"description": "Register the exact redirect URI shown by OrgSDK: your registered workspace origin followed by /oauth/callback. Add it under Authorized redirect URIs, not JavaScript origins."
 				},
 				{
 					"title": "Download the OAuth client JSON",
-					"description": "Download the client configuration and paste the complete file contents into the field below."
+					"description": "Download the OAuth client configuration, then enter its client ID and client secret in OrgSDK\u2019s native Connect form. Keep these secrets on the host; do not put them in plugin configuration."
 				},
 				{
 					"title": "Connect Google",
-					"description": "Saving valid JSON enables the authorization action. Complete Google's consent screen — Google Tasks is covered by this same connection."
+					"description": "Saving valid JSON enables the authorization action. Complete Google's consent screen \u2014 Google Tasks is covered by this same connection."
 				}
 			],
 			"callback": {
@@ -95,7 +94,7 @@
 		"permissionsSummary": "Access Google Sheets and Tasks data via OAuth.",
 		"seoOverview": {
 			"heading": "Integrate AI agents with Google Sheets",
-			"paragraph": "Connect Google Sheets to an OrgSDK agent team and give workflows direct read and write access to your spreadsheets. Agents can read a range as a lookup or config source, append rows from workflow output, and update individual columns inside a structured table — running on a schedule or on demand, with an approval gate before any write. The plugin supports both A1 ranges and Google's structured table format, so existing sheets work without migration."
+			"paragraph": "Connect Google Sheets to an OrgSDK agent team and give workflows direct read and write access to your spreadsheets. Agents can read a range as a lookup or config source, append rows from workflow output, and update individual columns inside a structured table \u2014 running on a schedule or on demand, with an approval gate before any write. The plugin supports both A1 ranges and Google's structured table format, so existing sheets work without migration."
 		},
 		"screenshots": [],
 		"links": {

@@ -1,3 +1,13 @@
+# Current execution contract
+
+Connect a BYO Google OAuth app with Sheets and Tasks scopes. OrgSDK owns consent and refresh. A connection can be attached to either plugin when it includes the required scope; no relay or client secret is used during execution.
+
+Native OAuth providers receive only `{source: "byo", secret_accessToken}`. The host owns refresh. The first-party relay is retired.
+
+## Historical source reference
+
+The following describes the former author-source host; current npm and native credential behaviour above takes precedence.
+
 # Google Sheets
 
 Read and write Google Sheets from agent workflows. Owns the shared **"Connect

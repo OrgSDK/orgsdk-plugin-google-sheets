@@ -1,5 +1,43 @@
 # @orgsdk/plugin-google-sheets
 
+## Current npm distribution and execution checks
+
+Updated **31 October 2026**. This public-release candidate uses `@orgsdk/plugins@0.2.2`
+and `@orgsdk/executor@0.1.0` (with the tracked packaging compatibility patch).
+`bun run build:npm` creates a public Apache-2.0 npm payload; `bun run test:executor`
+downloads the extracted npm entry into an empty executor store and executes every exported function headlessly.
+`bun run test:registration` verifies fresh-project registration using the npm host.
+See [npm distribution, CI activation and verification](docs/npm-distribution.md)
+for prerequisites, commands, fixtures and release settings. Publication remains
+an explicit release operation; source-root `private: true` is retained.
+
+## Current installation and credential contract
+
+Configure the generated `dist/npm/plugin.catalog.json` as an OrgSDK release
+catalogue, then add its pinned external release to a project. Installing npm files
+alone does not register the plugin. Its package URL addresses the immutable npm
+version through jsDelivr; that URL becomes available only after publication.
+The catalogue retains the bundle's SHA256 digest. No release is published by
+building or testing locally.
+
+Native Google, Twitter, LinkedIn and Facebook OAuth connections are owned by the
+OrgSDK host. Plugins receive only `{source: "byo", secret_accessToken}` under
+their provider key. Client and refresh secrets stay on the host. The retired
+first-party relay is unsupported. Generic token providers receive their stored
+secret record. See [the current distribution guide](docs/npm-distribution.md).
+
+### Provider settings
+
+Connect a BYO Google OAuth app with Sheets and Tasks scopes. OrgSDK owns consent and refresh. A connection can be attached to either plugin when it includes the required scope; no relay or client secret is used during execution.
+
+## Historical author-source and hosted-catalogue reference
+
+The material below preserves the original extraction and legacy authoring
+workflows. Its callback/relay, source-archive publication and private-licence
+claims describe the former host. The current npm, authentication and licensing
+contract above supersedes those claims.
+
+
 Official OrgSDK plugin for Google Sheets — range and structured-table read/write
 for agent workflows. Seven safe functions exposing the Google Sheets REST
 surface. This plugin **owns the shared `google-oauth` connect flow** for the
@@ -229,7 +267,4 @@ specifiers (`orgsdk/plugins` → `@orgsdk/plugins`), the manifest `$schema`,
 
 ## License
 
-Proprietary — All rights reserved. This source is the confidential property
-of OrgSDK. No part of this repository may be reproduced, distributed, or
-transmitted in any form without the prior written permission of OrgSDK.
-Unauthorized use, modification, or redistribution is strictly prohibited.
+Apache-2.0. See [LICENSE](LICENSE), [NOTICE](NOTICE) and [TRADEMARKS.md](TRADEMARKS.md).

@@ -123,9 +123,9 @@ async function stagePluginBundle(): Promise<StagedBundle> {
 			{
 				private: true,
 				dependencies: {
-					"@googleapis/sheets": "^13.0.2",
-					"google-auth-library": "^10.6.2",
-					zod: "^4.0.0",
+					"@googleapis/sheets": "18.1.2",
+					"google-auth-library": "11.3.2",
+					zod: "4.6.7",
 				},
 			},
 			null,
