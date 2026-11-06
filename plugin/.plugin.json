@@ -1,8 +1,8 @@
 {
 	"$schema": "https://orgsdk.ai/schemas/plugin-manifest.v1.json",
 	"name": "google-sheets",
-	"version": "1.0.4",
-	"description": "Google Sheets and Google Tasks share one Google connection. Connect once in Google Sheets to use both, with the option to bring your own OAuth client if needed.",
+	"version": "1.0.5",
+	"description": "Read and update Google Sheets using your own Google OAuth application. The OrgSDK host manages consent and refresh.",
 	"entry": "index.ts",
 	"auth": {
 		"type": "oauth2",

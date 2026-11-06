@@ -1,6 +1,6 @@
 {
 	"name": "@orgsdk/plugin-google-sheets",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Google Sheets read/write + owns the shared google-oauth connect flow for google-sheets and google-tasks (first-party one-click or BYO)",
 	"type": "module",
 	"private": true,

@@ -1,103 +1,43 @@
-# Current execution contract
+# Google Sheets for OrgSDK
 
-Connect a BYO Google OAuth app with Sheets and Tasks scopes. OrgSDK owns consent and refresh. A connection can be attached to either plugin when it includes the required scope; no relay or client secret is used during execution.
+## Install in OrgSDK
 
-Native OAuth providers receive only `{source: "byo", secret_accessToken}`. The host owns refresh. The first-party relay is retired.
+Open your project's Plugins page, select this plugin and enable the pinned release.
+The default catalogue is https://orgsdk.ai/plugins/releases.json. The executor
+downloads the versioned bundle and verifies its SHA256. Configure the provider
+and attach the credential described below before running an action.
 
-## Historical source reference
-
-The following describes the former author-source host; current npm and native credential behaviour above takes precedence.
-
-# Google Sheets
-
-Read and write Google Sheets from agent workflows. Owns the shared **"Connect
-Google"** OAuth flow used by both `google-sheets` and `google-tasks`, and
-supports one-click first-party connection when the relay holds OrgSDK's client.
-
-## What it does
-
-The `google-sheets` plugin turns a spreadsheet into a structured read/write
-target for agents. Two access models are supported:
-
-- **Range mode** — classic `Sheet1!A:Z` read/append, headers inferred from the
-  first row.
-- **Tables mode** — Google Sheets Tables (typed, named tables) for row-level
-  get / update.
-
-Typical uses:
-
-- **Reporting sink** — write a summary row after each workflow run.
-- **CRM sync** — append extracted contacts/entities to a shared sheet.
-- **Invoice pipeline** — read invoices from Gmail (the `gmail` plugin), extract
-  fields with `evalStructured`, and append rows here.
-
-## Functions
-
-| Function | Purpose |
-|---|---|
-| `getSheetData` | Read a range as rows. |
-| `appendToSheet` | Append rows to a range (first row = headers). |
-| `clearSheet` | Clear a range. |
-| `listSheetTables` | List named tables in a spreadsheet. |
-| `getTableData` | Read rows from a named table. |
-| `appendToTable` | Append rows to a named table. |
-| `updateTableRow` | Update a single row in a named table by index. |
-
-The full function list (parameters, return types) is available per-plugin via
-the `plugins:info` command in the dashboard.
+The plugin is Apache-2.0 licensed; see LICENSE, NOTICE and TRADEMARKS.md.
+The generated npm distribution is a separate publication surface. Installing npm
+files alone does not register a project plugin. Local builds do not publish it.
 
 ## Credentials
 
-Every function declares `requiredCredentials: ["google-oauth"]`, so a Google
-credential must be connected before any function is callable. This plugin
-owns the connect flow — connecting once stores a single `google-oauth`
-credential whose granted scopes cover **Sheets + Tasks** (the `google-tasks`
-plugin shares it; no second connect needed).
+Connect your own Google OAuth application in OrgSDK with `https://www.googleapis.com/auth/spreadsheets`.
+Enable the corresponding Google API and register the exact callback URL shown
+by OrgSDK in your Google Cloud OAuth client. Attach the resulting `google-oauth`
+credential to this project plugin. The host owns consent and token refresh;
+execution receives only `{source: "byo", secret_accessToken}`. Client and refresh
+secrets stay on the host. No hosted OAuth relay is supported.
 
-| Provider | Type | Connect method |
-|---|---|---|
-| `google-oauth` | oauth2 | **One-click "Connect Google"** when the relay has OrgSDK's first-party client configured; otherwise supply your own OAuth client JSON (BYO). |
+A Google credential may be shared with another Google plugin only when its granted
+scopes cover both plugins. Provider consent, app verification and account permissions
+are required independently of installing this package.
 
-> **BYO always wins.** If you've supplied your own Google OAuth client, it is
-> used in preference to the first-party client. The relay-held client secret
-> never reaches a tenant database or daemon container.
+## Functions
 
-## Using it in a workflow
+- `appendToSheet` — Append rows to a Google Sheet range. Always pass a 2D array: [[val1, val2], ...]. Spreadsheet ID + range are passed at runtime.
+- `getSheetData` — Read values from a Google Sheet range
+- `clearSheet` — Clear values in a Google Sheet range. Tip: use a range that excludes headers (e.g. Sheet1!A2:Z)
+- `listSheetTables` — List all structured tables in a Google Sheet. Returns array with tableId (string), name, sheetId, sheetTitle, range (GridRange), a1Range (A1 notation for debugging).
+- `appendToTable` — Append rows to a structured Google Sheet table. Pass rows as objects keyed by column name: [{ Provider: 'X', Amount: 100 }, ...]. Column names must match table headers exactly. Use listSheetTables to find tableId. Formula detection: strings starting with '='.
+- `getTableData` — Read all data rows from a structured Google Sheet table. Returns rows as objects with column names as keys. Each row includes _rowIndex for updates. Use listSheetTables to find tableId.
+- `updateTableRow` — Update specific columns in a row of a Google Sheet table. Use _rowIndex from getTableData. Pass updates as { columnName: newValue }.
+
+## Example action
 
 ```typescript
-// Append report rows (range mode — first row must be headers)
-await appendToSheet({
-  spreadsheetId: "1Abc...xyz",        // from the sheet URL
-  range: "Sheet1!A:Z",
-  rows: [
-    ["2026-07-09", "signup", 42],
-    ["2026-07-09", "churn", 3],
-  ],
-});
-
-// Read typed rows from a named table
-const table = await getTableData({
-  spreadsheetId: "1Abc...xyz",
-  tableId: "contacts",
-});
+return await googleSheets.getSheetData({ spreadsheetId: "your-spreadsheet-id", range: "Sheet1!A1:D20" });
 ```
 
-## Composing with other plugins
-
-A common invoice pipeline reads from Gmail, extracts with the LLM plugin, and
-writes here. This requires a **BYO** client whose granted scopes cover Gmail +
-Sheets (the first-party client does not include Gmail):
-
-```
-getMessages({ query: "subject:invoice newer_than:7d" })   // gmail plugin
-  → evalStructured(emailBody, invoiceSchema)                // llm plugin
-  → appendToSheet(spreadsheetId, range, rows)            // google-sheets plugin
-```
-
-## Notes
-
-- Always call `getSheetHeaders`/`getSheetData` before appending to
-  verify column order.
-- For large datasets, prefer `appendToTable` (batch) over row-by-row.
-- Gmail is a restricted scope and lives in the separate `gmail` plugin (BYO
-  only) — see that plugin's overview.
+Use named argument objects. Exact parameters and return types are in the release catalogue and the project tool contract.
